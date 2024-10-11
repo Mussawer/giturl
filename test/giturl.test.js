@@ -65,5 +65,53 @@ describe('giturl.test.js', function () {
       giturl.parse('https://git.foo.com/foo/bar').should.equal('https://git.foo.com/foo/bar');
       giturl.parse('git://git.foo.com/foo/bar.git').should.equal('http://git.foo.com/foo/bar');
     });
+
+    // Tests parse() function for correct handling of various Bitbucket URL formats
+    it('should parse Bitbucket URLs', function () {
+      giturl.parse('git@bitbucket.org:username/repo.git').should.equal('https://bitbucket.org/username/repo');
+      giturl.parse('https://username@bitbucket.org/username/repo.git').should.equal('https://bitbucket.org/username/repo');
+      giturl.parse('git://bitbucket.org/username/repo.git').should.equal('https://bitbucket.org/username/repo');
+    });
+  });
+});
+
+describe('extractInfo()', function () {
+  // Tests extractInfo() function for correct extraction of repository information from a GitHub URL
+  it('should extract repository information from GitHub URL', function () {
+    var info = giturl.extractInfo('https://github.com/user/repo.git');
+    should.deepEqual(info, {
+      host: 'github.com',
+      owner: 'user',
+      name: 'repo',
+      branch: null
+    });
+  });
+
+  // Tests extractInfo() function for correct extraction of repository information from a GitLab URL
+  it('should extract repository information from GitLab URL', function () {
+    var info = giturl.extractInfo('git@gitlab.com:user/repo.git');
+    should.deepEqual(info, {
+      host: 'gitlab.com',
+      owner: 'user',
+      name: 'repo',
+      branch: null
+    });
+  });
+
+  // Tests extractInfo() function to ensure it returns null for invalid URLs
+  it('should return null for invalid URLs', function () {
+    var result = giturl.extractInfo('invalid-url');
+    should.equal(result, null);
+  });
+
+  // Tests extractInfo() function for correct handling of GitLab URLs with subgroup repositories
+  it('should handle subgroup repositories in GitLab', function () {
+    var info = giturl.extractInfo('https://gitlab.com/group/subgroup/repo.git');
+    should.deepEqual(info, {
+      host: 'gitlab.com',
+      owner: 'group',
+      name: 'subgroup/repo',
+      branch: null
+    });
   });
 });
